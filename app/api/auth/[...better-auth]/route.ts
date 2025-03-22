@@ -31,7 +31,8 @@ async function handleRequest(request: NextRequest) {
       try {
         const body = await clone.json();
         console.log('📝 Request body:', JSON.stringify(body, null, 2));
-        // Transform the body for signup requests
+        
+        // Transform the body based on request type
         if (request.nextUrl.pathname === '/api/auth/sign-up/email') {
           requestInit.body = JSON.stringify({
             email: body.email,
@@ -42,10 +43,15 @@ async function handleRequest(request: NextRequest) {
               callbackUrl: body.callbackUrl
             }
           });
-          console.log('📝 Transformed request body:', requestInit.body);
+        } else if (request.nextUrl.pathname === '/api/auth/sign-in/email') {
+          requestInit.body = JSON.stringify({
+            email: body.email,
+            password: body.password
+          });
         } else {
           requestInit.body = JSON.stringify(body);
         }
+        console.log('📝 Transformed request body:', requestInit.body);
       } catch (e) {
         console.log('📝 Request body: No JSON body or empty');
       }

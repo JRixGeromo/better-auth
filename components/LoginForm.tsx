@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import styles from './LoginForm.module.css';
+import { authClient } from '@/lib/auth-client';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
@@ -15,28 +16,26 @@ export function LoginForm() {
     setError(null);
 
     try {
-      const response = await fetch('/api/auth/sign-in/email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: email.trim(),
-          password: password.trim()
-        })
+      console.log('🔄 Attempting login with:', { email });
+
+      const { data, error: signInError } = await authClient.signIn.email({
+        email: email.trim(),
+        password: password.trim(),
+        rememberMe: true
       });
 
-      const data = await response.json();
+      console.log('📤 Sign in response:', { data, error: signInError });
 
-      if (!response.ok) {
-        throw new Error(data.error?.message || 'Failed to sign in');
+      if (signInError) {
+        throw new Error(signInError.message || 'Failed to sign in');
       }
+
+      console.log('✅ Login successful:', { userId: data?.user?.id });
 
       // Redirect to dashboard on success
       window.location.href = '/dashboard';
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('❌ Login error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred during sign in');
     } finally {
       setLoading(false);

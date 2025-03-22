@@ -7,12 +7,7 @@ const baseURL = process.env.NEXT_PUBLIC_APP_URL
 
 console.log(' Better Auth client base URL:', baseURL);
 
+// Create the client with just the baseURL as shown in docs
 export const authClient = createAuthClient({
-  baseURL,
-  fetchOptions: {
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }
+  baseURL
 });
