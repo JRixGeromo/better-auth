@@ -5,15 +5,17 @@ import * as schema from "./schema";
 
 // Validate required environment variables
 const authSecret = process.env.BETTER_AUTH_SECRET?.trim();
+const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim() || 'http://localhost:3000';
 
 // Following our global rules about error handling and logging
-function validateConfig(): { secret: string } {
+function validateConfig(): { secret: string; appUrl: string } {
   if (!authSecret) {
     throw new Error('❌ Missing required environment variable: BETTER_AUTH_SECRET');
   }
 
   return {
-    secret: authSecret
+    secret: authSecret,
+    appUrl
   };
 }
 
@@ -23,12 +25,20 @@ const config = validateConfig();
 // Initialize BetterAuth with Drizzle adapter
 export const auth = betterAuth({
   secret: config.secret,
+  baseURL: config.appUrl,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
       ...schema,
       user: schema.users,
-      session: schema.sessions
+      session: schema.sessions,
+      verification: schema.emailVerification,
+      passwordReset: schema.passwordReset
     }
-  })
+  }),
+  emailAndPassword: {
+    enabled: true,
+    autoSignIn: true,
+    verifyEmail: true
+  }
 });
