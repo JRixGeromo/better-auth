@@ -1,3 +1,18 @@
+# Next.js + Supabase + BetterAuth Example
+
+This project demonstrates how to implement authentication using Next.js, Supabase, and BetterAuth.
+
+## Environment Setup
+
+Create a `.env.local` file with the following variables:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+SUPABASE_ANON_KEY=your-anon-key
+DATABASE_URL=postgresql://your-db-user:your-db-password@your-db-host:your-db-port/your-db-name
+```
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
