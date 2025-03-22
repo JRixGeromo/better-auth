@@ -8,6 +8,34 @@
       "when": 1742561918106,
       "tag": "0000_deep_wallop",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1742623508730,
+      "tag": "0001_graceful_forge",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1742623989246,
+      "tag": "0002_first_wild_child",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1742624161793,
+      "tag": "0003_flashy_malice",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1742624791491,
+      "tag": "0004_low_santa_claus",
+      "breakpoints": true
     }
   ]
 }

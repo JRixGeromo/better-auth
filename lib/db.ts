@@ -1,4 +1,5 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
+import { and, eq } from 'drizzle-orm';
 import postgres from 'postgres';
 import * as schema from './schema';
 
@@ -24,6 +25,49 @@ const client = postgres(dbUrl, {
 
 // Create drizzle database instance with schema
 export const db = drizzle(client, { schema });
+
+// Set up query builder
+const queries = {
+  user: {
+    findFirst: async (args: { where: any }) => {
+      const result = await db.select().from(schema.user).where(args.where).limit(1);
+      return result[0];
+    },
+    findMany: async (args: { where: any }) => {
+      return await db.select().from(schema.user).where(args.where);
+    }
+  },
+  session: {
+    findFirst: async (args: { where: any }) => {
+      const result = await db.select().from(schema.session).where(args.where).limit(1);
+      return result[0];
+    },
+    findMany: async (args: { where: any }) => {
+      return await db.select().from(schema.session).where(args.where);
+    }
+  },
+  verification: {
+    findFirst: async (args: { where: any }) => {
+      const result = await db.select().from(schema.verification).where(args.where).limit(1);
+      return result[0];
+    },
+    findMany: async (args: { where: any }) => {
+      return await db.select().from(schema.verification).where(args.where);
+    }
+  },
+  account: {
+    findFirst: async (args: { where: any }) => {
+      const result = await db.select().from(schema.account).where(args.where).limit(1);
+      return result[0];
+    },
+    findMany: async (args: { where: any }) => {
+      return await db.select().from(schema.account).where(args.where);
+    }
+  }
+};
+
+// Add query builder to db instance
+(db as any).query = queries;
 
 // Export schema for convenience
 export { schema };
