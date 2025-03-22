@@ -14,8 +14,8 @@ export async function POST(request: NextRequest) {
     const { email, password, name } = body;
 
     // Check if user exists
-    const existingUser = await db.query.user.findFirst({
-      where: eq(schema.user.email, email)
+    const existingUser = await db.query.users.findFirst({
+      where: eq(schema.users.email, email)
     });
 
     if (existingUser) {
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const now = new Date();
 
     // Create user
-    const [user] = await db.insert(schema.user)
+    const [user] = await db.insert(schema.users)
       .values({
         id: userId,
         email,
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const sessionToken = uuidv4();
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
-    const [session] = await db.insert(schema.session)
+    const [session] = await db.insert(schema.sessions)
       .values({
         id: sessionId,
         token: sessionToken,

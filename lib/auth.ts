@@ -8,7 +8,7 @@ import { sendVerificationEmail } from "./email";
 interface User {
   id: string;
   email: string;
-  name: string | null;
+  name: string;
   emailVerified: boolean;
 }
 
@@ -43,10 +43,10 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
-      user: schema.user,
-      session: schema.session,
-      verification: schema.verification,
-      account: schema.account
+      ...schema,
+      user: schema.users,
+      session: schema.sessions,
+      verification: schema.emailVerification
     }
   }),
   session: {
@@ -76,6 +76,12 @@ export const auth = betterAuth({
     maxPasswordLength: 100,
     requireEmailVerification: true,
     sendVerificationEmail: async ({ user, verificationToken }: VerificationEmailParams) => {
+      console.log('🔍 Attempting to send verification email:', {
+        email: user.email,
+        tokenLength: verificationToken.length,
+        userId: user.id
+      });
+      
       try {
         await sendVerificationEmail(user.email, verificationToken);
         console.log('✅ Verification email sent successfully');

@@ -1,12 +1,18 @@
 import { auth } from "@/lib/auth";
 import { NextRequest } from "next/server";
 
-// Create a handler that uses the auth instance
-const handler = {
-  GET: async (request: NextRequest) => auth.handler(request),
-  POST: async (request: NextRequest) => auth.handler(request),
-  PUT: async (request: NextRequest) => auth.handler(request),
-  DELETE: async (request: NextRequest) => auth.handler(request)
-};
+export async function GET(request: NextRequest) {
+  return auth.handler(request);
+}
 
-export const { GET, POST, PUT, DELETE } = handler;
+export async function POST(request: NextRequest) {
+  return auth.handler(request);
+}
+
+export async function PUT(request: NextRequest) {
+  return auth.handler(request);
+}
+
+export async function DELETE(request: NextRequest) {
+  return auth.handler(request);
+}

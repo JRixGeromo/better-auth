@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import styles from './LoginForm.module.css';
-import { authClient } from '@/lib/client';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
@@ -16,13 +15,22 @@ export function LoginForm() {
     setError(null);
 
     try {
-      const { data, error: signInError } = await authClient.signIn.email({
-        email: email.trim(),
-        password: password.trim()
+      const response = await fetch('/api/auth/sign-in/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: email.trim(),
+          password: password.trim()
+        })
       });
 
-      if (signInError) {
-        throw new Error(signInError.message);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error?.message || 'Failed to sign in');
       }
 
       // Redirect to dashboard on success

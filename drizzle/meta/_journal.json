@@ -36,6 +36,13 @@
       "when": 1742624791491,
       "tag": "0004_low_santa_claus",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1742626900987,
+      "tag": "0005_charming_wild_child",
+      "breakpoints": true
     }
   ]
 }

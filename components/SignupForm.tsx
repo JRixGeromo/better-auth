@@ -2,52 +2,64 @@
 
 import { useState } from 'react';
 import styles from './SignupForm.module.css';
-import { authClient } from '@/lib/client';
 
 export function SignupForm() {
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setSuccess(false);
 
     try {
-      const { data, error: signUpError } = await authClient.signUp.email({
-        email: email.trim(),
-        name: name.trim(),
-        password: password.trim()
+      // Trim inputs
+      const trimmedEmail = email.trim();
+      const trimmedName = name.trim();
+      const trimmedPassword = password.trim();
+
+      // Log the request data
+      console.log('Signup request:', { email: trimmedEmail, name: trimmedName });
+
+      // Make the signup request
+      const response = await fetch('/api/auth/sign-up/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: trimmedEmail,
+          password: trimmedPassword,
+          name: trimmedName,
+          callbackURL: '/dashboard'
+        })
       });
 
-      if (signUpError) {
-        throw new Error(signUpError.message);
+      // Log the response status
+      console.log('Signup response status:', response.status);
+
+      // Parse the response
+      const data = await response.json();
+      console.log('Signup response data:', data);
+
+      if (data.error) {
+        setError(data.error.message || 'An error occurred during signup');
+        return;
       }
 
-      setSuccess(true);
+      // If successful, redirect to dashboard
+      window.location.href = '/dashboard';
     } catch (err) {
       console.error('Signup error:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred during sign up');
+      setError('An unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
-
-  if (success) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.success}>
-          <h2>Check your email</h2>
-          <p>We sent you a verification link. Please check your email to verify your account.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={styles.container}>
@@ -94,7 +106,7 @@ export function SignupForm() {
         </div>
 
         <button type="submit" disabled={loading} className={styles.button}>
-          {loading ? 'Creating account...' : 'Create Account'}
+          {loading ? 'Signing up...' : 'Sign Up'}
         </button>
       </form>
     </div>
