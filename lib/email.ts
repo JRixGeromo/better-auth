@@ -3,11 +3,20 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendVerificationEmail(email: string, token: string) {
+  console.log('📧 Email service called with:', {
+    email,
+    tokenLength: token.length,
+    apiKeyExists: !!process.env.RESEND_API_KEY,
+    apiKeyLength: process.env.RESEND_API_KEY?.length
+  });
+
   const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`;
+  console.log('🔗 Verification URL:', verificationUrl);
 
   try {
+    console.log('📤 Sending email via Resend...');
     const { data, error } = await resend.emails.send({
-      from: 'Better Auth <auth@yourdomain.com>',
+      from: 'no-reply@jobbify.com.au',
       to: email,
       subject: 'Verify your email address',
       html: `
@@ -27,14 +36,14 @@ export async function sendVerificationEmail(email: string, token: string) {
     });
 
     if (error) {
-      console.error('Failed to send verification email:', error);
+      console.error('❌ Resend API error:', error);
       throw error;
     }
 
-    console.log('Verification email sent:', data);
+    console.log('✅ Email sent successfully:', data);
     return data;
   } catch (error) {
-    console.error('Error sending verification email:', error);
+    console.error('❌ Error in sendVerificationEmail:', error);
     throw error;
   }
 }
