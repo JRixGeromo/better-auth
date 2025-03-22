@@ -1,8 +1,16 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import * as schema from './schema';
 
-// Initialize postgres client with pooler connection
-const sql = postgres(process.env.BETTER_AUTH_DATABASE_URL!, { 
+// Validate required environment variables
+const dbUrl = process.env.BETTER_AUTH_DATABASE_URL?.trim();
+
+if (!dbUrl) {
+  throw new Error('❌ Missing required environment variable: BETTER_AUTH_DATABASE_URL');
+}
+
+// Create postgres client
+const client = postgres(dbUrl, { 
   ssl: {
     rejectUnauthorized: false // Required for Supabase pooler's self-signed cert
   },
@@ -14,5 +22,8 @@ const sql = postgres(process.env.BETTER_AUTH_DATABASE_URL!, {
   }
 });
 
-// Initialize Drizzle with the postgres client
-export const db = drizzle(sql);
+// Create drizzle database instance with schema
+export const db = drizzle(client, { schema });
+
+// Export schema for convenience
+export { schema };
