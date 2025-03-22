@@ -1,105 +1,108 @@
 'use client';
 
 import { useState } from 'react';
-import styles from './SignupForm.module.css';
 
-export function SignupForm() {
+export default function SignupForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
-    setError(null);
 
     try {
-      console.log('🔄 Starting signup...', {
-        email: email.trim(),
-        name: name.trim(),
-        passwordLength: password.length
-      });
-
-      // Send request directly to the API route
+      console.log('📝 Submitting signup form:', { email, password, name });
+      
       const response = await fetch('/api/auth/sign-up/email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: email.trim(),
-          password: password.trim(),
-          name: name.trim()
-        })
+          email,
+          password,
+          name
+        }),
       });
 
-      const data = await response.json();
-      console.log('✅ Signup response:', data);
-
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to sign up');
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to sign up');
       }
 
       // Redirect to dashboard on success
       window.location.href = '/dashboard';
-    } catch (err) {
+    } catch (err: any) {
       console.error('❌ Signup error:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred during signup');
+      setError(err.message || 'Failed to sign up');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className={styles.container}>
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <h2 className={styles.title}>Sign Up</h2>
-        
-        {error && <div className={styles.error}>{error}</div>}
-        
-        <div className={styles.inputGroup}>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className={styles.input}
-          />
+    <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-600 rounded-md p-3">
+          {error}
         </div>
+      )}
 
-        <div className={styles.inputGroup}>
-          <label htmlFor="name">Name</label>
-          <input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            className={styles.input}
-          />
-        </div>
+      <div>
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          Name
+        </label>
+        <input
+          id="name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          required
+        />
+      </div>
 
-        <div className={styles.inputGroup}>
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-            className={styles.input}
-          />
-        </div>
+      <div>
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          Email
+        </label>
+        <input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          required
+        />
+      </div>
 
-        <button type="submit" disabled={loading} className={styles.button}>
-          {loading ? 'Signing up...' : 'Sign Up'}
-        </button>
-      </form>
-    </div>
+      <div>
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          Password
+        </label>
+        <input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          required
+          minLength={8}
+          maxLength={32}
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+      >
+        {loading ? 'Signing up...' : 'Sign up'}
+      </button>
+    </form>
   );
 }

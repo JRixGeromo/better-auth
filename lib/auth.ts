@@ -22,7 +22,7 @@ function validateConfig(): { secret: string; appUrl: string } {
 // Validate configuration
 const config = validateConfig();
 
-// Initialize BetterAuth with Drizzle adapter
+// Initialize BetterAuth with drizzle adapter
 export const auth = betterAuth({
   secret: config.secret,
   baseURL: config.appUrl,
@@ -30,14 +30,51 @@ export const auth = betterAuth({
     provider: "pg",
     schema: {
       ...schema,
-      user: schema.users,
-      session: schema.sessions,
-      verification: schema.emailVerification
-    }
+      user: schema.users
+    },
+    usePlural: true
   }),
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
-    requireEmailVerification: false
+    maxPasswordLength: 32,
+    requireEmailVerification: false,
+    hashPassword: true,
+    onBeforeCreateUser: async (data: { email: string; password?: string; name?: string; data?: any }) => {
+      console.log('📝 [Better Auth] Before creating user:', {
+        email: data.email,
+        name: data.name || data.data?.name,
+        hasPassword: !!data.password,
+        passwordLength: data.password?.length,
+        fields: Object.keys(data),
+        rawData: data,
+        stack: new Error().stack
+      });
+
+      // Return minimal data to ensure password is included
+      const userData = {
+        email: data.email,
+        password: data.password,
+        name: data.name || data.data?.name || data.email.split('@')[0]
+      };
+
+      console.log('📤 [Better Auth] Returning user data:', {
+        ...userData,
+        hasPassword: !!userData.password,
+        passwordLength: userData.password?.length,
+        fields: Object.keys(userData)
+      });
+      return userData;
+    },
+    onCreateUser: async (data) => {
+      console.log('✅ [Better Auth] Creating user:', {
+        data,
+        hasPassword: !!data.password,
+        passwordLength: data.password?.length,
+        fields: Object.keys(data),
+        stack: new Error().stack
+      });
+      return data;
+    }
   }
 });

@@ -1,10 +1,11 @@
-import { pgTable, text, timestamp, boolean, uuid } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import { createId } from '@paralleldrive/cuid2';
 
 export const users = pgTable('users', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull(),
+  id: text('id').primaryKey().$defaultFn(() => createId()),
   email: text('email').notNull().unique(),
-  password: text('password').notNull(),
+  name: text('name').notNull(),
+  password: text('password').notNull(), // Changed back to password
   emailVerified: boolean('email_verified').notNull().default(false),
   image: text('image'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -12,8 +13,8 @@ export const users = pgTable('users', {
 });
 
 export const sessions = pgTable('sessions', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').notNull().references(() => users.id),
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   token: text('token').notNull().unique(),
   expiresAt: timestamp('expires_at').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -22,9 +23,9 @@ export const sessions = pgTable('sessions', {
   userAgent: text('user_agent')
 });
 
-export const emailVerification = pgTable('email_verification', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').notNull().references(() => users.id),
+export const verifications = pgTable('verifications', { 
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   token: text('token').notNull().unique(),
   expiresAt: timestamp('expires_at').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),

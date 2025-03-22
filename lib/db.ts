@@ -22,8 +22,8 @@ const client = postgres(dbUrl, {
   }
 });
 
-// Create drizzle database instance with schema
-export const db = drizzle(client, { schema });
+// Create drizzle database instance
+export const db = drizzle(client, { schema: { ...schema } });
 
 // Export schema for convenience
 export { schema };

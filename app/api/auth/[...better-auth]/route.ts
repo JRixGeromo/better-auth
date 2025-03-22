@@ -11,21 +11,6 @@ async function handleRequest(request: NextRequest) {
       params: request.nextUrl.searchParams
     });
 
-    // Get the request body if it exists
-    let body;
-    if (request.body) {
-      const clone = request.clone();
-      const text = await clone.text();
-      try {
-        if (text) {
-          body = JSON.parse(text);
-          console.log('📝 Request body:', JSON.stringify(body, null, 2));
-        }
-      } catch (e) {
-        console.log('📝 Request body parsing error:', e);
-      }
-    }
-
     // Create a new request with the correct URL
     const newUrl = request.url.replace('/api/auth/[...better-auth]', '/api/auth');
     console.log('🔄 Forwarding request to:', newUrl);
@@ -40,13 +25,33 @@ async function handleRequest(request: NextRequest) {
       duplex: 'half'
     };
 
-    // Only add body if we parsed it successfully
-    if (body) {
-      requestInit.body = JSON.stringify(body);
+    // Only add body if it exists
+    if (request.body) {
+      const clone = request.clone();
+      try {
+        const body = await clone.json();
+        console.log('📝 Request body:', JSON.stringify(body, null, 2));
+        // Transform the body for signup requests
+        if (request.nextUrl.pathname === '/api/auth/sign-up/email') {
+          requestInit.body = JSON.stringify({
+            email: body.email,
+            password: body.password,
+            name: body.name,
+            data: {
+              name: body.name,
+              callbackUrl: body.callbackUrl
+            }
+          });
+          console.log('📝 Transformed request body:', requestInit.body);
+        } else {
+          requestInit.body = JSON.stringify(body);
+        }
+      } catch (e) {
+        console.log('📝 Request body: No JSON body or empty');
+      }
     }
 
     const authRequest = new Request(newUrl, requestInit);
-
     const response = await auth.handler(authRequest);
     
     // Log response for debugging
@@ -55,7 +60,7 @@ async function handleRequest(request: NextRequest) {
     try {
       responseBody = await responseClone.json();
     } catch (e) {
-      responseBody = await responseClone.text();
+      responseBody = '';
     }
     console.log('📤 Response:', {
       status: response.status,
@@ -65,11 +70,8 @@ async function handleRequest(request: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error('❌ Auth handler error:', error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Internal server error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.error('# SERVER_ERROR: ', error);
+    return new Response('', { status: 500 });
   }
 }
 
