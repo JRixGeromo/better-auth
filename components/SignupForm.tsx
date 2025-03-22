@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import styles from './SignupForm.module.css';
 
 export function SignupForm() {
   const [email, setEmail] = useState('');
@@ -15,8 +16,13 @@ export function SignupForm() {
     setError(null);
 
     try {
+      // Trim inputs
+      const trimmedEmail = email.trim();
+      const trimmedName = name.trim();
+      const trimmedPassword = password.trim();
+
       // Log the request data
-      console.log('Signup request:', { email, name });
+      console.log('Signup request:', { email: trimmedEmail, name: trimmedName });
 
       // Make the signup request
       const response = await fetch('/api/auth/sign-up/email', {
@@ -26,9 +32,9 @@ export function SignupForm() {
         },
         credentials: 'include',
         body: JSON.stringify({
-          email,
-          password,
-          name,
+          email: trimmedEmail,
+          password: trimmedPassword,
+          name: trimmedName,
           callbackURL: '/dashboard'
         })
       });
@@ -56,49 +62,53 @@ export function SignupForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      {error && <div style={{ color: 'red' }}>{error}</div>}
-      
-      <div>
-        <label>
-          Name:
+    <div className={styles.container}>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <h2 className={styles.title}>Sign Up</h2>
+        
+        {error && <div className={styles.error}>{error}</div>}
+        
+        <div className={styles.inputGroup}>
+          <label htmlFor="name">Name</label>
           <input
+            id="name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
+            className={styles.input}
           />
-        </label>
-      </div>
+        </div>
 
-      <div>
-        <label>
-          Email:
+        <div className={styles.inputGroup}>
+          <label htmlFor="email">Email</label>
           <input
+            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className={styles.input}
           />
-        </label>
-      </div>
+        </div>
 
-      <div>
-        <label>
-          Password:
+        <div className={styles.inputGroup}>
+          <label htmlFor="password">Password</label>
           <input
+            id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
+            className={styles.input}
           />
-        </label>
-      </div>
+        </div>
 
-      <button type="submit" disabled={loading}>
-        {loading ? 'Signing up...' : 'Sign Up'}
-      </button>
-    </form>
+        <button type="submit" disabled={loading} className={styles.button}>
+          {loading ? 'Signing up...' : 'Sign Up'}
+        </button>
+      </form>
+    </div>
   );
 }
