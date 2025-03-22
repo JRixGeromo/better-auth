@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db";
 import * as schema from "./schema";
+import { cookies } from "next/headers";
 
 // Validate required environment variables
 const authSecret = process.env.BETTER_AUTH_SECRET?.trim();
@@ -49,7 +50,21 @@ export const auth = betterAuth({
     cookie: {
       name: 'session',
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax'
+      sameSite: 'lax',
+      httpOnly: true,
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60 // 30 days
+    },
+    onSessionCreated: async (session) => {
+      // Set session cookie
+      const cookieStore = cookies();
+      cookieStore.set('session', session.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60 // 30 days
+      });
     }
   },
   emailAndPassword: {

@@ -16,6 +16,9 @@
     "@auth/supabase-adapter": "^1.8.0",
     "@better-auth/cli": "^1.2.4",
     "@supabase/supabase-js": "^2.49.1",
+    "@types/bcrypt": "^5.0.2",
+    "@types/uuid": "^10.0.0",
+    "bcrypt": "^5.1.1",
     "better-auth": "^1.2.4",
     "dotenv": "^16.4.7",
     "drizzle-kit": "^0.30.5",
@@ -25,7 +28,8 @@
     "node-fetch": "^3.3.2",
     "pg": "^8.14.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
