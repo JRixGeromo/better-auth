@@ -1,54 +1,47 @@
 import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 
-export const users = pgTable("users", {
+export const users = pgTable("user", {
   id: text("id").primaryKey(),
+  name: text("name").notNull(),
   email: text("email").unique().notNull(),
-  name: text("name"),
-  password: text("password"),
-  emailVerified: boolean("email_verified").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  emailVerified: boolean("email_verified").notNull(),
+  image: text("image"),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
 });
 
-export const sessions = pgTable("sessions", {
+export const sessions = pgTable("session", {
   id: text("id").primaryKey(),
-  userId: text("user_id").references(() => users.id),
-  expiresAt: timestamp("expires_at"),
+  expiresAt: timestamp("expires_at").notNull(),
+  token: text("token").notNull().unique(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
 });
 
 export const account = pgTable("account", {
   id: text("id").primaryKey(),
-  accountId: text("account_id").notNull().default('default'),
-  providerId: text("provider_id").notNull().default('better-auth'),
-  password: text("password"),
-  userId: text("user_id").references(() => users.id).notNull(),
-  type: text("type").notNull().default('credentials'),
-  provider: text("provider").notNull().default('better-auth'),
-  providerAccountId: text("provider_account_id").notNull(),
-  refreshToken: text("refresh_token"),
+  accountId: text("account_id").notNull().default("default"),
+  providerId: text("provider_id").notNull().default("better-auth"),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   accessToken: text("access_token"),
-  expiresAt: timestamp("expires_at"),
-  tokenType: text("token_type"),
-  scope: text("scope"),
+  refreshToken: text("refresh_token"),
   idToken: text("id_token"),
-  sessionState: text("session_state"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  accessTokenExpiresAt: timestamp("access_token_expires_at"),
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+  scope: text("scope"),
+  password: text("password"),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
 });
 
-export const emailVerification = pgTable("email_verification", {
+export const emailVerification = pgTable("verification", {
   id: text("id").primaryKey(),
-  userId: text("user_id").references(() => users.id).notNull(),
-  token: text("token").notNull(),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const passwordReset = pgTable("password_reset", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").references(() => users.id).notNull(),
-  token: text("token").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at"),
+  updatedAt: timestamp("updated_at"),
 });
