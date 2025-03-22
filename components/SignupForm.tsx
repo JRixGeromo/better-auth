@@ -16,46 +16,37 @@ export function SignupForm() {
     setError(null);
 
     try {
-      // Trim inputs
-      const trimmedEmail = email.trim();
-      const trimmedName = name.trim();
-      const trimmedPassword = password.trim();
+      console.log('🔄 Starting signup...', {
+        email: email.trim(),
+        name: name.trim(),
+        passwordLength: password.length
+      });
 
-      // Log the request data
-      console.log('Signup request:', { email: trimmedEmail, name: trimmedName });
-
-      // Make the signup request
+      // Send request directly to the API route
       const response = await fetch('/api/auth/sign-up/email', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        credentials: 'include',
         body: JSON.stringify({
-          email: trimmedEmail,
-          password: trimmedPassword,
-          name: trimmedName,
-          callbackURL: '/dashboard'
+          email: email.trim(),
+          password: password.trim(),
+          name: name.trim()
         })
       });
 
-      // Log the response status
-      console.log('Signup response status:', response.status);
-
-      // Parse the response
       const data = await response.json();
-      console.log('Signup response data:', data);
+      console.log('✅ Signup response:', data);
 
-      if (data.error) {
-        setError(data.error.message || 'An error occurred during signup');
-        return;
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to sign up');
       }
 
-      // If successful, redirect to dashboard
+      // Redirect to dashboard on success
       window.location.href = '/dashboard';
     } catch (err) {
-      console.error('Signup error:', err);
-      setError('An unexpected error occurred');
+      console.error('❌ Signup error:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred during signup');
     } finally {
       setLoading(false);
     }
@@ -69,24 +60,24 @@ export function SignupForm() {
         {error && <div className={styles.error}>{error}</div>}
         
         <div className={styles.inputGroup}>
-          <label htmlFor="name">Name</label>
-          <input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            className={styles.input}
-          />
-        </div>
-
-        <div className={styles.inputGroup}>
           <label htmlFor="email">Email</label>
           <input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
+            className={styles.input}
+          />
+        </div>
+
+        <div className={styles.inputGroup}>
+          <label htmlFor="name">Name</label>
+          <input
+            id="name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
             className={styles.input}
           />

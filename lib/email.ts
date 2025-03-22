@@ -2,34 +2,41 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export async function sendVerificationEmail(email: string, token: string) {
+interface EmailParams {
+  user: {
+    email: string;
+  };
+  url: string;
+  token: string;
+}
+
+export async function sendVerificationEmail({ user, url, token }: EmailParams) {
   console.log('📧 Email service called with:', {
-    email,
+    email: user.email,
     tokenLength: token.length,
     apiKeyExists: !!process.env.RESEND_API_KEY,
     apiKeyLength: process.env.RESEND_API_KEY?.length
   });
 
-  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`;
-  console.log('🔗 Verification URL:', verificationUrl);
+  console.log('🔗 Verification URL:', url);
 
   try {
     console.log('📤 Sending email via Resend...');
     const { data, error } = await resend.emails.send({
       from: 'no-reply@jobbify.com.au',
-      to: email,
+      to: user.email,
       subject: 'Verify your email address',
       html: `
         <div>
           <h1>Welcome to Better Auth!</h1>
           <p>Please verify your email address by clicking the link below:</p>
           <p>
-            <a href="${verificationUrl}">
+            <a href="${url}">
               Verify Email Address
             </a>
           </p>
           <p>Or copy and paste this URL into your browser:</p>
-          <p>${verificationUrl}</p>
+          <p>${url}</p>
           <p>This link will expire in 24 hours.</p>
         </div>
       `

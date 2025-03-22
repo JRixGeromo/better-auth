@@ -2,20 +2,6 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db";
 import * as schema from "./schema";
-import { sendVerificationEmail } from "./email";
-
-// Define types for Better Auth
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  emailVerified: boolean;
-}
-
-interface VerificationEmailParams {
-  user: User;
-  verificationToken: string;
-}
 
 // Validate required environment variables
 const authSecret = process.env.BETTER_AUTH_SECRET?.trim();
@@ -49,46 +35,9 @@ export const auth = betterAuth({
       verification: schema.emailVerification
     }
   }),
-  session: {
-    modelName: 'session',
-    fields: {
-      token: 'token',
-      userId: 'userId',
-      expiresAt: 'expiresAt',
-      createdAt: 'createdAt',
-      updatedAt: 'updatedAt',
-      ipAddress: 'ipAddress',
-      userAgent: 'userAgent'
-    },
-    cookie: {
-      name: 'session',
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      httpOnly: true,
-      path: '/',
-      maxAge: 30 * 24 * 60 * 60 // 30 days
-    }
-  },
   emailAndPassword: {
     enabled: true,
-    autoSignIn: true,
     minPasswordLength: 8,
-    maxPasswordLength: 100,
-    requireEmailVerification: true,
-    sendVerificationEmail: async ({ user, verificationToken }: VerificationEmailParams) => {
-      console.log('🔍 Attempting to send verification email:', {
-        email: user.email,
-        tokenLength: verificationToken.length,
-        userId: user.id
-      });
-      
-      try {
-        await sendVerificationEmail(user.email, verificationToken);
-        console.log('✅ Verification email sent successfully');
-      } catch (error) {
-        console.error('❌ Failed to send verification email:', error);
-        // Don't throw here to prevent blocking signup
-      }
-    }
+    requireEmailVerification: false
   }
 });
