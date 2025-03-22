@@ -1,13 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { authClient } from '@/lib/auth-client';
-
-interface ErrorContext {
-  error: {
-    message: string;
-  };
-}
 
 export function SignupForm() {
   const [email, setEmail] = useState('');
@@ -22,27 +15,40 @@ export function SignupForm() {
     setError(null);
 
     try {
-      const { data, error } = await authClient.signUp.email({
-        email,
-        password,
-        name,
-        callbackURL: '/dashboard'
-      }, {
-        onRequest: () => {
-          setLoading(true);
+      // Log the request data
+      console.log('Signup request:', { email, name });
+
+      // Make the signup request
+      const response = await fetch('/api/auth/sign-up/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
         },
-        onSuccess: () => {
-          window.location.href = '/dashboard';
-        },
-        onError: (ctx: ErrorContext) => {
-          setError(ctx.error.message);
-        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+          callbackURL: '/dashboard'
+        })
       });
 
-      if (error) {
-        setError(error.message || 'An error occurred during signup');
+      // Log the response status
+      console.log('Signup response status:', response.status);
+
+      // Parse the response
+      const data = await response.json();
+      console.log('Signup response data:', data);
+
+      if (data.error) {
+        setError(data.error.message || 'An error occurred during signup');
+        return;
       }
+
+      // If successful, redirect to dashboard
+      window.location.href = '/dashboard';
     } catch (err) {
+      console.error('Signup error:', err);
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);

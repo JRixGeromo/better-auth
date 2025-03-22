@@ -7,4 +7,10 @@ const baseURL = process.env.NEXT_PUBLIC_APP_URL
 
 export const authClient = createAuthClient({
   baseURL,
+  fetchOptions: {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
 });

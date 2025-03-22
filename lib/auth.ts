@@ -35,9 +35,19 @@ export const auth = betterAuth({
       verification: schema.emailVerification
     }
   }),
-  cookies: {
-    session: {
-      name: 'better_auth_session',
+  session: {
+    modelName: 'session',
+    fields: {
+      token: 'token',
+      userId: 'userId',
+      expiresAt: 'expiresAt',
+      createdAt: 'createdAt',
+      updatedAt: 'updatedAt',
+      ipAddress: 'ipAddress',
+      userAgent: 'userAgent'
+    },
+    cookie: {
+      name: 'session',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax'
     }
@@ -45,6 +55,12 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
-    requireEmailVerification: true
+    minPasswordLength: 8,
+    maxPasswordLength: 100,
+    requireEmailVerification: true,
+    sendVerificationEmail: async ({ user, verificationToken }: { user: any; verificationToken: string }) => {
+      // For now, just log the verification token
+      console.log('Verification token for', user.email, ':', verificationToken);
+    }
   }
 });
