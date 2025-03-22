@@ -35,9 +35,16 @@ export const auth = betterAuth({
       verification: schema.emailVerification
     }
   }),
+  cookies: {
+    session: {
+      name: 'better_auth_session',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    }
+  },
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
-    verifyEmail: true
+    requireEmailVerification: true
   }
 });

@@ -1,34 +1,29 @@
+import { authClient } from '@/lib/auth-client';
 import { db, schema } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 
 export async function GET() {
-  // Get session token from cookie
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get('session')?.value;
-  
-  if (!sessionToken) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  try {
+    // Get session from client
+    const { data: sessionData } = await authClient.getSession();
+
+    if (!sessionData?.session) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    // Find user
+    const user = await db.query.users.findFirst({
+      where: eq(schema.users.id, sessionData.session.userId)
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ user });
+  } catch (error) {
+    console.error('Error in /api/auth/user:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-
-  // Find session
-  const session = await db.query.sessions.findFirst({
-    where: eq(schema.sessions.token, sessionToken)
-  });
-
-  if (!session) {
-    return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
-  }
-
-  // Find user
-  const user = await db.query.users.findFirst({
-    where: eq(schema.users.id, session.userId)
-  });
-
-  if (!user) {
-    return NextResponse.json({ error: 'User not found' }, { status: 404 });
-  }
-
-  return NextResponse.json({ user });
 }
