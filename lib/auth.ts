@@ -2,7 +2,20 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db";
 import * as schema from "./schema";
-import { cookies } from "next/headers";
+import { sendVerificationEmail } from "./email";
+
+// Define types for Better Auth
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  emailVerified: boolean;
+}
+
+interface VerificationEmailParams {
+  user: User;
+  verificationToken: string;
+}
 
 // Validate required environment variables
 const authSecret = process.env.BETTER_AUTH_SECRET?.trim();
@@ -54,17 +67,6 @@ export const auth = betterAuth({
       httpOnly: true,
       path: '/',
       maxAge: 30 * 24 * 60 * 60 // 30 days
-    },
-    onSessionCreated: async (session) => {
-      // Set session cookie
-      const cookieStore = cookies();
-      cookieStore.set('session', session.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 30 * 24 * 60 * 60 // 30 days
-      });
     }
   },
   emailAndPassword: {
@@ -73,9 +75,13 @@ export const auth = betterAuth({
     minPasswordLength: 8,
     maxPasswordLength: 100,
     requireEmailVerification: true,
-    sendVerificationEmail: async ({ user, verificationToken }: { user: any; verificationToken: string }) => {
-      // For now, just log the verification token
-      console.log('Verification token for', user.email, ':', verificationToken);
+    sendVerificationEmail: async ({ user, verificationToken }: VerificationEmailParams) => {
+      try {
+        await sendVerificationEmail(user.email, verificationToken);
+      } catch (error) {
+        console.error('Failed to send verification email:', error);
+        // Don't throw here to prevent blocking signup
+      }
     }
   }
 });
